@@ -1,4 +1,5 @@
 include("backpropagation.jl")
+include("forward.jl")
 
 function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, test_y_one_hot)
 
@@ -7,12 +8,10 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
     average_epoch_train_acc=[]
     average_epoch_test_acc=[]
 
-    for epoch in 1:epochs
+    @time for epoch in 1:epochs
 
         epoch_train_loss=[]
-        epoch_test_loss=[]
         epoch_train_correct_count=0.0
-        epoch_test_correct_count=0.0
 
         batch_counter=1;
         loss=0.0;
@@ -20,7 +19,12 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
         
         println("Running epoch ", epoch)
 
-        for i in 1:size(train_y,1)
+        # for i in 1:size(train_y,1)
+        for i in 1:3
+
+            if i % 10000 == 0
+                println(i)
+            end
             
             x_tr = reshape(train_x[:, :, i], 28, 28, 1)
             y_hat_tr = forward(x_tr, net);
@@ -51,7 +55,7 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
 
         println("Train Accuracy: ", epoch_train_correct_count/size(train_y,1))
 
-        append!(average_epoch_train_loss, sum(epoch_train_loss)/length(epoch_train_loss))
+        # append!(average_epoch_train_loss, sum(epoch_train_loss)/length(epoch_train_loss))
         append!(average_epoch_train_acc, epoch_train_correct_count/size(train_y,1))
         
         # append!(average_epoch_test_loss, sum(epoch_test_loss)/length(epoch_test_loss))
@@ -59,19 +63,24 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
 
     end
 
-    for i in 1:size(test_y,1)
+    test_correct_count=0.0
+    test_loss=[]
+
+    # for i in 1:size(test_y,1)
+    for i in 1:3
 
         x_te=test_x[:,:,i];
         x_te = reshape(test_x[:, :, i], 28, 28, 1)
         y_hat_te=forward(x_te, net);
         y_te=reshape(test_y_one_hot[:,i], 10, 1);
 
-        append!(epoch_test_loss, xe_loss(y_hat_te,y_te))
-        epoch_test_correct_count+=(argmax(y_hat_te)==argmax(y_te))
+        append!(test_loss, xe_loss(y_hat_te,y_te))
+        test_correct_count+=(argmax(y_hat_te)==argmax(y_te))
 
     end
 
-    println("Test Accuracy: ", epoch_test_correct_count/size(test_y,1))
+    println("Test Accuracy: ", test_correct_count/size(test_y,1))
+    println("Test Loss: ", sum(test_loss)/length(test_loss))
 
     results = Dict("training_loss"=>average_epoch_train_loss, 
                  "test_loss"=>average_epoch_test_loss, 

@@ -4,6 +4,7 @@ using Plots
 
 include("helpers.jl");
 include("components.jl");
+include("act_fun.jl");
 include("train.jl");
 
 
@@ -30,10 +31,10 @@ test_y_one_hot=zi_one_hot_encode(test_y);
 
 #train
 mb_size=100
-epochs=3
+epochs=1
 lr=1e-2
 
-results=@time train(net, mb_size, lr, epochs, train_x, test_x, train_y_one_hot, test_y_one_hot);
+results=train(net, mb_size, lr, epochs, train_x, test_x, train_y_one_hot, test_y_one_hot);
 
 
 # #plot
