@@ -1,5 +1,6 @@
-include("backpropagation.jl")
+include("backward.jl")
 include("forward.jl")
+include("act_fun.jl")
 
 function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, test_y_one_hot)
 
@@ -14,38 +15,47 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
         epoch_train_correct_count=0.0
 
         batch_counter=1;
-        loss=0.0;
-        d=-1
+        batch_loss=0.0;
+        # d=-1
         
         println("Running epoch ", epoch)
 
-        # for i in 1:size(train_y,1)
-        for i in 1:1
+        for i in 1:size(train_y,1)
+        # for i in 1:1
 
             if i % 10000 == 0
                 println(i)
             end
             
             x_tr = reshape(train_x[:, :, i], 28, 28, 1)
-            y_hat_tr =@time forward(x_tr, net);
+            y_hat_tr =forward(x_tr, net);
             y_tr = reshape(train_y_one_hot[:, i], 10, 1);
 
-            loss_grad = xe_loss_derivative(y_hat_tr, y_tr)./batch_size
+            loss, accuracy, grad_loss = loss_and_accuracy(y_hat_tr, y_tr)
 
-            d =@time accumulate_gradient(loss_grad, net, d)
+            # println("Loss: ", loss)
+            # println("Accuracy: ", accuracy)
+            # println("Grad Loss: ", grad_loss)
+            # grad_loss = xe_loss_derivative(y_hat_tr, y_tr)./batch_size
 
-            loss = loss.+(xe_loss(y_hat_tr, y_tr)./batch_size)
+            accumulate_gradient(grad_loss, net)
+
+            # loss_grad = xe_loss_derivative(y_hat_tr, y_tr)./batch_size
+
+            # d =accumulate_gradient(loss_grad, net)
+
+            # batch_loss += loss
             epoch_train_correct_count+=(argmax(y_hat_tr) == argmax(y_tr))
             
             if batch_counter%batch_size==0
 
-                update(d, lr, net)
+                update(lr, net)
                 
-                append!(epoch_train_loss, loss)
+                # append!(epoch_train_loss, (batch_loss / batch_size))
 
-                d=-1;
+                # d=-1;
                 batch_counter=0;
-                loss=0.0;
+                batch_loss=0.0;
 
             end
 
@@ -56,7 +66,7 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
         println("Train Accuracy: ", epoch_train_correct_count/size(train_y,1))
 
         # append!(average_epoch_train_loss, sum(epoch_train_loss)/length(epoch_train_loss))
-        append!(average_epoch_train_acc, epoch_train_correct_count/size(train_y,1))
+        # append!(average_epoch_train_acc, epoch_train_correct_count/size(train_y,1))
         
         # append!(average_epoch_test_loss, sum(epoch_test_loss)/length(epoch_test_loss))
         # append!(average_epoch_test_acc, epoch_test_correct_count/size(test_y,1))
@@ -66,8 +76,8 @@ function train(net, batch_size, lr, epochs, train_x, test_x, train_y_one_hot, te
     test_correct_count=0.0
     test_loss=[]
 
-    # for i in 1:size(test_y,1)
-    for i in 1:1
+    for i in 1:size(test_y,1)
+    # for i in 1:3
 
         x_te=test_x[:,:,i];
         x_te = reshape(test_x[:, :, i], 28, 28, 1)

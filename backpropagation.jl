@@ -40,7 +40,37 @@ function accumulate_gradient(grad, net, d)
     else
         for n in 1:depth
             if typeof(net["Layers"][n]) != MaxPoolingLayer && typeof(net["Layers"][n]) != FlattenLayer
-                # println("size: ", size(d[1][n]))
+
+                # if length(size(d[1][n])) == 4
+                #     for i in 1:size(d[1][n], 1)
+                #         for j in 1:size(d[1][n], 2)
+                #             for k in 1:size(d[1][n], 3)
+                #                 for l in 1:size(d[1][n], 4)
+                #                     d[1][n][i, j, k, l] = d[1][n][i, j, k, l] + dW[n][i, j, k, l]
+                #                 end
+                #             end
+                #         end
+                #     end
+                # else
+                #     for i in 1:size(d[1][n], 1)
+                #         for j in 1:size(d[1][n], 2)
+                #             d[1][n][i, j] = d[1][n][i, j] + dW[n][i, j]
+                #         end
+                #     end
+                # end
+
+                # if length(size(d[2][n])) == 2
+                #     for i in 1:size(d[2][n], 1)
+                #         for j in 1:size(d[2][n], 2)
+                #             d[2][n][i, j] = d[2][n][i, j] + dB[n][i, j]
+                #         end
+                #     end
+                # else
+                #     for i in 1:size(d[2][n], 1)
+                #         d[2][n][i] = d[2][n][i] + dB[n][i]
+                #     end
+                # end
+
                 d[1][n]=d[1][n].+dW[n]
                 d[2][n]=d[2][n].+dB[n]
             end
@@ -77,8 +107,21 @@ function calculate_gradient(layer::MaxPoolingLayer, dA::Array{Float64, 3}, W::No
     pool_size = layer.pool_size
     stride = layer.stride
     pad = layer.pad
+    # println(size(A_prev))
+    # if layer.dinput === nothing
+    #     layer.dinput = zeros(size(A_prev))
+    # else 
+    #     for i in 1:size(A_prev, 1)
+    #         for j in 1:size(A_prev, 2)
+    #             for c in 1:size(A_prev, 3)
+    #                 layer.dinput[i, j, c] = 0
+    #             end
+    #         end
+    #     end
+    # end
     
     dinput = zeros(size(A_prev))
+    # dinput = layer.dinput
     # dinput = get_buffer(layer, "dinput", size(A_prev))
     
     for c in 1:size(A_prev, 3)
