@@ -5,21 +5,11 @@ function accumulate_gradient(grad, net)
     for i in 1:depth
         layer = net["Layers"][depth-i+1]
         grad = calculate_gradient(layer, grad)
-        # println(typeof(layer), " grad: ", size(grad))
     end
     return grad
 end;
 
 function calculate_gradient(layer::Dense, grad)
-    # d_act = d_activate(Z, act_fn)
-    # println("dA: ", size(dA))
-    # for i in 1:size(dA, 1)
-    #     for j in 1:size(dA, 2)
-    #         dZ[i, j] = dA[i, j] * tmp
-    #     end
-    # end
-    # println(typeof(layer.act_fn))
-    # println(grad)
     dZ = grad .* d_activate(layer.activation_val, layer.act_fn)
 
     dW = (dZ * layer.input')
@@ -113,17 +103,15 @@ function calculate_gradient(layer::ConvLayer, grad::Array{Float64, 3})
 end
 
 # update
-function update(learning_rate, net)
+function update(learning_rate, net, batch_size)
     for i in 1:length(net["Layers"])
         layer = net["Layers"][i]
         if !isa(layer, MaxPoolingLayer) && !isa(layer, FlattenLayer)
-            # println("name: ", typeof(layer), layer.grad_weight)
-            layer.grad_weight ./= 100
-            layer.grad_bias ./= 100
+            layer.grad_weight ./= batch_size
+            layer.grad_bias ./= batch_size
 
             layer.weight .-= (learning_rate) * layer.grad_weight;
             layer.bias .-= (learning_rate) * layer.grad_bias;
-            # exit()
         end
     end
 end;

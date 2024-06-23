@@ -33,18 +33,23 @@ test_y_one_hot=zi_one_hot_encode(test_y);
 mb_size=100
 epochs=3
 lr=1e-2
-# lr = 0.5
 
-results=train(net, mb_size, lr, epochs, train_x, test_x, train_y_one_hot, test_y_one_hot);
+acc_results, loss_results=train(net, mb_size, lr, epochs, train_x, test_x, train_y_one_hot, test_y_one_hot);
 
+plot(collect(1:length(acc_results)), acc_results, lw=2, label=["Training accuracy"], legend=:bottomright)
+xlabel!("Batch")
+ylabel!("Accuracy")
 
-# #plot
-# plot([results["training_loss"], results["test_loss"]], lw=2, label=["Train" "Test"], legend=:topright)
-# xlabel!("Epoch")
-# ylabel!("Loss")
-# savefig("training.png")
+epoki = [600, 1200, 1800] 
+xticks!(epoki, ["Epoch 1", "Epoch 2", "Epoch 3"])
 
-# plot([results["training_acc"], results["test_acc"]], lw=2, label=["Train" "Test"], legend=:bottomright)
-# xlabel!("Epoch")
-# ylabel!("Accuracy")
-# savefig("accuracy.png")
+savefig("accuracy_batch.png")
+
+plot(collect(1:length(loss_results)), loss_results, lw=2, label=["Training loss"], legend=:bottomright)
+xlabel!("Batch")
+ylabel!("Loss")
+
+epoki = [600, 1200, 1800] 
+xticks!(epoki, ["Epoch 1", "Epoch 2", "Epoch 3"])
+
+savefig("loss_batch.png")
